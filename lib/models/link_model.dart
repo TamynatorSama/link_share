@@ -10,7 +10,7 @@ class LinkModel {
   LinkModel(
       {
         required this.linkName, required this.linkSvg, required this.linkUrl}) {
-          id = Uuid().v4();
+          id = const Uuid().v4();
     if (linkSvg.toLowerCase().contains("assets/images")) {
       isLocal = true;
     } else {
