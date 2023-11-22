@@ -65,13 +65,12 @@ class _LinkPageState extends State<LinkPage> {
                             CustomButton(
                                 text: "+ Add new link",
                                 inverted: true,
-                                onTap: (){
+                                onTap: () {
                                   List<LinkModel> allLinks = state.links;
 
                                   allLinks = [
                                     ...allLinks,
-                                    LinkModel(
-                                        linkName: "", linkSvg: "", linkUrl: "")
+                                    LinkModel(linkName: "",linkSvg: "", linkUrl: "")
                                   ];
                                   var newState =
                                       state.copyWith(updatedLinks: allLinks);
@@ -91,13 +90,44 @@ class _LinkPageState extends State<LinkPage> {
                           children: [
                             Expanded(
                                 child: state.links.isNotEmpty
-                                    ? ReorderableListView.builder(
+                                    ? 
+                                    // ListView.builder(
+                                    //     controller: newController,
+                                    //     itemBuilder:
+                                    //         (BuildContext context, int index) {
+                                    //       return LinkEditor(
+                                            // key:
+                                            //     ValueKey(state.links[index].id),
+                                            // remove: () {
+                                            //   List<LinkModel> links =
+                                            //       state.links;
+                                            //   links.removeAt(index);
+                                            //   context.read<AppBloc>().add(
+                                            //       UpdateAppState(state.copyWith(
+                                            //           updatedLinks: links)));
+                                            // },
+                                            // model: state.links[index],
+                                            // index: index + 1,
+                                    //       );
+                                    //     },
+                                    //     itemCount: state.links.length,
+                                    //   )
+                                    ReorderableListView.builder(
                                         scrollController: newController,
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           return LinkEditor(
                                             key:
                                                 ValueKey(state.links[index].id),
+                                            remove: () {
+                                              List<LinkModel> links =
+                                                  state.links;
+                                              links.removeAt(index);
+                                              context.read<AppBloc>().add(
+                                                  UpdateAppState(state.copyWith(
+                                                      updatedLinks: links)));
+                                            },
+                                            model: state.links[index],
                                             index: index + 1,
                                           );
                                         },
@@ -134,8 +164,11 @@ class _LinkPageState extends State<LinkPage> {
                                   child: CustomButton(
                                     text: "Save",
                                     shouldShowLoader: true,
-                                    onTap: () async{
-                                      await Future.delayed(const Duration(seconds: 1),(){print('done with the future');});
+                                    onTap: () async {
+                                      await Future.delayed(
+                                          const Duration(seconds: 1), () {
+                                        print('done with the future');
+                                      });
                                     },
                                   ),
                                 ),

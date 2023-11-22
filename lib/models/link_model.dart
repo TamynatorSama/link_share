@@ -2,9 +2,9 @@ import 'package:uuid/uuid.dart';
 
 class LinkModel {
   late String id;
-  final String linkName;
-  final String linkUrl;
-  final String linkSvg;
+  late String linkName;
+  late String linkUrl;
+  late String linkSvg;
   late bool isLocal;
 
   LinkModel(
@@ -34,4 +34,8 @@ class LinkModel {
 
   @override
   int get hashCode => Object.hash(linkName, linkUrl, linkSvg,id);
+
+  @override
+  String toString()=> "LinkModel(link_name:$linkName,link_url:$linkUrl)";
+
 }
