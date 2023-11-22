@@ -65,7 +65,7 @@ class _LinkPageState extends State<LinkPage> {
                             CustomButton(
                                 text: "+ Add new link",
                                 inverted: true,
-                                onTap: () {
+                                onTap: (){
                                   List<LinkModel> allLinks = state.links;
 
                                   allLinks = [
@@ -133,7 +133,10 @@ class _LinkPageState extends State<LinkPage> {
                                       horizontal: 14),
                                   child: CustomButton(
                                     text: "Save",
-                                    onTap: () {},
+                                    shouldShowLoader: true,
+                                    onTap: () async{
+                                      await Future.delayed(const Duration(seconds: 1),(){print('done with the future');});
+                                    },
                                   ),
                                 ),
                                 SizedBox(

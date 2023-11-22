@@ -21,9 +21,9 @@ class _ProfileInfoState extends State<ProfileInfo> {
     User? currentUser = context.read<AppBloc>().state.currentUser;
     emailController = TextEditingController(text: currentUser?.email ?? "");
     firstNameController =
-        TextEditingController(text: currentUser?.name ?? "".split(" ").first);
+        TextEditingController(text: (currentUser?.name ?? "").split(" ").first);
     lastNameController =
-        TextEditingController(text: currentUser?.name ?? "".split(" ").last);
+        TextEditingController(text: (currentUser?.name ?? "").split(" ").last);
 
     super.initState();
   }
