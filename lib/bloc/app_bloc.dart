@@ -10,13 +10,16 @@ import 'package:link_share/screens/auth_flow/login.dart';
 import 'package:link_share/screens/home_screen.dart';
 import 'package:link_share/shared/custom_loader.dart';
 import 'package:link_share/utils/appwrite_initializer.dart';
+import 'package:link_share/utils/dependency_manager.dart';
 import 'package:link_share/utils/feedback_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppBloc extends Bloc<AppActions, AppState> {
+  Account account = Account(AppWriteInit.appClient);
+
   AppBloc() : super(AppState()) {
     on<InitUser>((event, emit) async {
-      Account account = Account(AppWriteInit.appClient);
+      // Account account = Account(AppWriteInit.appClient);
 
       try {
         User currentUser = await account.get();
@@ -35,54 +38,41 @@ class AppBloc extends Bloc<AppActions, AppState> {
     });
     on<RegisterUser>((event, emit) async {
       emit(AppState(isLoading: true));
-      Account createAccount = Account(AppWriteInit.appClient);
 
-      try {
-        User newUser = await createAccount.create(
-            userId: ID.unique(), email: event.email, password: event.password);
-        emit(AppState(isLoading: false, currentUser: newUser));
+      var response =
+          await currentUserService.registerUser(event.email, event.password);
+
+      if (response['status']) {
+        emit(AppState(isLoading: false, currentUser: response['result']));
         await Navigator.pushAndRemoveUntil(
             MyApp.navigatorKey.currentContext!,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false);
-      } catch (e) {
-        if (e is AppwriteException) {
-          showFeedbackToast(CustomLoader.dialogContext!, e.message ?? "");
-        }
-        showFeedbackToast(
-            CustomLoader.dialogContext!, "unable to process your request");
-        emit(AppState(isLoading: false));
       }
+
+      emit(AppState(
+        isLoading: false,
+      ));
       CustomLoader.dismiss();
+      showFeedbackToast(CustomLoader.dialogContext!, response['message']);
     });
     on<LoginUser>((event, emit) async {
       emit(AppState(isLoading: true));
-      Account account = Account(AppWriteInit.appClient);
-      try {
-        await account.createEmailSession(
-            email: event.email, password: event.password);
+      var response =
+          await currentUserService.loginUser(event.email, event.password);
 
-        User loggedInUser = await account.get();
-
-        SharedPreferences preferences = await SharedPreferences.getInstance();
-
-        preferences.setBool("isLoggedIn", true);
-
+      if (response["status"]) {
         emit(AppState(
-          currentUser: loggedInUser,
+          currentUser: response["result"],
         ));
         await Navigator.pushAndRemoveUntil(
             MyApp.navigatorKey.currentContext!,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
             (route) => false);
-      } catch (e) {
-        if (e is AppwriteException) {
-          showFeedbackToast(CustomLoader.dialogContext!, e.message ?? "");
-        }
-        showFeedbackToast(
-            CustomLoader.dialogContext!, "unable to process your request");
-        emit(AppState());
       }
+
+      showFeedbackToast(CustomLoader.dialogContext!, response['message']);
+      emit(AppState());
       CustomLoader.dismiss();
     });
   }
