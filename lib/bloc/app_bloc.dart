@@ -19,11 +19,15 @@ class AppBloc extends Bloc<AppActions, AppState> {
 
   AppBloc() : super(AppState()) {
     on<InitUser>((event, emit) async {
-      // Account account = Account(AppWriteInit.appClient);
 
       try {
         User currentUser = await account.get();
-        emit(AppState(currentUser: currentUser));
+        var response = await currentLinkService.getLinks(currentUser.$id);
+        if(!response["status"]){
+          showFeedbackToast(CustomLoader.dialogContext!, response['message']);
+          emit(AppState(currentUser: currentUser));
+        }
+        emit(AppState(currentUser: currentUser,links: response["result"]));
       } catch (e) {
         Navigator.pushAndRemoveUntil(
             MyApp.navigatorKey.currentContext!,

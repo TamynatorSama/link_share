@@ -9,13 +9,21 @@ class LinkModel {
 
   LinkModel(
       {
-        required this.linkName, /*required this.linkSvg,*/ required this.linkUrl}) {
+        required this.linkName, /*required this.linkSvg,*/ required this.linkUrl,this.isLocal = false}) {
           id = const Uuid().v4();
     // if (linkSvg.toLowerCase().contains("assets/images")) {
     //   isLocal = true;
     // } else {
     //   isLocal = false;
     // }
+  }
+
+
+  LinkModel.fromJson(Map<String,dynamic>json){
+    id = json["id"];
+    linkName = json["link_name"];
+    linkUrl = json["link_url"];
+    isLocal = json["isLocal"] ?? false;
   }
 
   @override
