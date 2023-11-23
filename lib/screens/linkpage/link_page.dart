@@ -8,6 +8,7 @@ import 'package:link_share/screens/linkpage/widget/empty_place_holder.dart';
 import 'package:link_share/screens/linkpage/widget/link_editior.dart';
 import 'package:link_share/shared/custom_button.dart';
 import 'package:link_share/shared/shared_theme.dart';
+import 'package:link_share/utils/dependency_manager.dart';
 import 'package:link_share/utils/keyboard_checker.dart';
 
 class LinkPage extends StatefulWidget {
@@ -62,23 +63,31 @@ class _LinkPageState extends State<LinkPage> {
                             ),
                             AnimatedBuilder(
                               animation: keyboardState,
-                              builder: (context,child)=>AnimatedContainer(
+                              builder: (context, child) => AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                height:
-                                    ((MediaQuery.of(context).size.height * 0.05) - (keyboardState.keyboardIsOpened?30:0))
-                                        .clamp(10, 40),
+                                height: ((MediaQuery.of(context).size.height *
+                                            0.05) -
+                                        (keyboardState.keyboardIsOpened
+                                            ? 30
+                                            : 0))
+                                    .clamp(10, 40),
                               ),
                             ),
                             CustomButton(
                                 text: "+ Add new link",
                                 inverted: true,
                                 onTap: () {
+                                  setState(() {
+                                    LinkModel.linksSynced = false;
+                                  });
+
                                   List<LinkModel> allLinks = state.links;
+                                  LinkModel newLink = LinkModel(linkName: "", linkUrl: "");
+                                  
 
                                   allLinks = [
                                     ...allLinks,
-                                    LinkModel(
-                                        linkName: "", linkUrl: "")
+                                    newLink
                                   ];
                                   var newState =
                                       state.copyWith(updatedLinks: allLinks);
@@ -86,6 +95,7 @@ class _LinkPageState extends State<LinkPage> {
                                   context
                                       .read<AppBloc>()
                                       .add(UpdateAppState(newState));
+                                      LinkModel.createdLinks.add(newLink.id);
                                 }),
                             const SizedBox(
                               height: 20,
@@ -98,29 +108,7 @@ class _LinkPageState extends State<LinkPage> {
                           children: [
                             Expanded(
                                 child: state.links.isNotEmpty
-                                    ?
-                                    // ListView.builder(
-                                    //     controller: newController,
-                                    //     itemBuilder:
-                                    //         (BuildContext context, int index) {
-                                    //       return LinkEditor(
-                                    // key:
-                                    //     ValueKey(state.links[index].id),
-                                    // remove: () {
-                                    //   List<LinkModel> links =
-                                    //       state.links;
-                                    //   links.removeAt(index);
-                                    //   context.read<AppBloc>().add(
-                                    //       UpdateAppState(state.copyWith(
-                                    //           updatedLinks: links)));
-                                    // },
-                                    // model: state.links[index],
-                                    // index: index + 1,
-                                    //       );
-                                    //     },
-                                    //     itemCount: state.links.length,
-                                    //   )
-                                    ReorderableListView.builder(
+                                    ? ReorderableListView.builder(
                                         scrollController: newController,
                                         itemBuilder:
                                             (BuildContext context, int index) {
@@ -161,8 +149,7 @@ class _LinkPageState extends State<LinkPage> {
                                 listenable: keyboardState,
                                 builder: (context, child) {
                                   return Offstage(
-                                    offstage:
-                                        keyboardState.keyboardIsOpened,
+                                    offstage: keyboardState.keyboardIsOpened,
                                     child: Column(
                                       children: [
                                         const Divider(
@@ -172,10 +159,23 @@ class _LinkPageState extends State<LinkPage> {
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 14),
-                                          child: CustomButton(text: "Save"),
+                                          child: CustomButton(
+                                            text: "Save",
+                                            shouldShowLoader: true,
+                                            onTap:LinkModel.linksSynced?null: () async{
+                                              await currentLinkService.syncData(state.links, state.currentUser!.$id);
+                                                  setState(() {
+                                                    
+                                                  });
+                                                  // print("how");
+                                      //             context
+                                      // .read<AppBloc>()
+                                      // .add(const SyncLinks());
+                                                },
+                                          ),
                                         ),
                                         SizedBox(
                                           height: MediaQuery.of(context)
@@ -207,13 +207,9 @@ class _LinkPageState extends State<LinkPage> {
                             //   ),
                             // ),
                             SizedBox(
-                              height:
-                                  MediaQuery.of(context).padding.bottom < 10
-                                      ? 10
-                                      : MediaQuery.of(context)
-                                              .padding
-                                              .bottom +
-                                          10,
+                              height: MediaQuery.of(context).padding.bottom < 10
+                                  ? 10
+                                  : MediaQuery.of(context).padding.bottom + 10,
                             )
                           ],
                         ),

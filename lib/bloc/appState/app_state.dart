@@ -5,19 +5,18 @@ class AppState {
   final bool isLoading;
   final User? currentUser;
   final List<LinkModel> links;
-  AppState({this.isLoading = false, this.currentUser, this.links = const []}) {
-    if (currentUser != null) {
-      print(currentUser!.prefs.data);
-    }
-  }
+  AppState(
+      {this.isLoading = false,
+      this.currentUser,
+      this.links = const [],});
 
-  AppState copyWith({bool? loading, User? updatedUser, List<LinkModel>? updatedLinks}){
+  AppState copyWith(
+      {bool? loading, User? updatedUser, List<LinkModel>? updatedLinks}) {
     return AppState(
-          isLoading: loading ?? isLoading,
-          currentUser: updatedUser ?? currentUser,
-          links: updatedLinks ?? links);
+        isLoading: loading ?? isLoading,
+        currentUser: updatedUser ?? currentUser,
+        links: updatedLinks ?? links);
   }
-
 }
 
 // extension on AppState {
