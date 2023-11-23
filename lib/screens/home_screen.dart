@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // resizeToAvoidBottomInset: selectedIndex !=0,
       backgroundColor: const Color(0xffFAFAFA),
       appBar: AppBar(
         backgroundColor: Colors.white,
