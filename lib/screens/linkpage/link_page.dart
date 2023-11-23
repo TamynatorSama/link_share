@@ -78,7 +78,7 @@ class _LinkPageState extends State<LinkPage> {
                                   allLinks = [
                                     ...allLinks,
                                     LinkModel(
-                                        linkName: "", linkSvg: "", linkUrl: "")
+                                        linkName: "", linkUrl: "")
                                   ];
                                   var newState =
                                       state.copyWith(updatedLinks: allLinks);
