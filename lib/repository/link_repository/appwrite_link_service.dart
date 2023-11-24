@@ -28,7 +28,7 @@ class AppWriteLinkService implements LinkService {
       return {
         "status": true,
         "message": "links retrieved successfully",
-        "result": []
+        "result": <LinkModel>[]
       };
     } on AppwriteException catch (e) {
       return {"status": false, "message": e.message};
@@ -44,19 +44,33 @@ class AppWriteLinkService implements LinkService {
         sortoutCreatedLinks(currentModel, userId);
         bool hasError = false;
     if (createdLinks.isNotEmpty) {
-      
       await Future.forEach(createdLinks, (element)async{
         try {
           await databases.createDocument(
               databaseId: appWriteDatabaseId,
               collectionId: appWriteLinkCollectionId,
-              documentId: ID.unique(),
+              documentId: element["id"],
               data: element);
-              print(element["id"]);
               LinkModel.createdLinks.remove(element["id"]);
         } on AppwriteException catch (e) {
           hasError = true;
           if(kDebugMode) print(e.message);
+        }
+      });
+      if(!hasError){
+        LinkModel.linksSynced = true;
+      }
+    }
+    if(LinkModel.deletedLinks.isNotEmpty){
+      await Future.forEach(LinkModel.deletedLinks, (element)async{
+        try{
+          await databases.deleteDocument(databaseId: appWriteDatabaseId, collectionId: appWriteLinkCollectionId, documentId: element);
+        }on AppwriteException catch (e) {
+          hasError = true;
+          if(kDebugMode) print(e.message);
+        }catch(e){
+         hasError = true;
+          if(kDebugMode) print(e); 
         }
       });
       if(!hasError){

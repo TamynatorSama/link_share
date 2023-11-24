@@ -82,20 +82,17 @@ class _LinkPageState extends State<LinkPage> {
                                   });
 
                                   List<LinkModel> allLinks = state.links;
-                                  LinkModel newLink = LinkModel(linkName: "", linkUrl: "");
-                                  
+                                  LinkModel newLink =
+                                      LinkModel(linkName: "", linkUrl: "");
 
-                                  allLinks = [
-                                    ...allLinks,
-                                    newLink
-                                  ];
+                                  allLinks = [...allLinks, newLink];
                                   var newState =
                                       state.copyWith(updatedLinks: allLinks);
 
                                   context
                                       .read<AppBloc>()
                                       .add(UpdateAppState(newState));
-                                      LinkModel.createdLinks.add(newLink.id);
+                                  LinkModel.createdLinks.add(newLink.id);
                                 }),
                             const SizedBox(
                               height: 20,
@@ -118,6 +115,9 @@ class _LinkPageState extends State<LinkPage> {
                                             remove: () {
                                               List<LinkModel> links =
                                                   state.links;
+                                              validateDeleteLink(
+                                                  links[index].id);
+
                                               links.removeAt(index);
                                               context.read<AppBloc>().add(
                                                   UpdateAppState(state.copyWith(
@@ -165,16 +165,20 @@ class _LinkPageState extends State<LinkPage> {
                                           child: CustomButton(
                                             text: "Save",
                                             shouldShowLoader: true,
-                                            onTap:LinkModel.linksSynced?null: () async{
-                                              await currentLinkService.syncData(state.links, state.currentUser!.$id);
-                                                  setState(() {
-                                                    
-                                                  });
-                                                  // print("how");
-                                      //             context
-                                      // .read<AppBloc>()
-                                      // .add(const SyncLinks());
-                                                },
+                                            onTap: LinkModel.linksSynced
+                                                ? null
+                                                : () async {
+                                                    await currentLinkService
+                                                        .syncData(
+                                                            state.links,
+                                                            state.currentUser!
+                                                                .$id);
+                                                    setState(() {});
+                                                    // print("how");
+                                                    //             context
+                                                    // .read<AppBloc>()
+                                                    // .add(const SyncLinks());
+                                                  },
                                           ),
                                         ),
                                         SizedBox(
@@ -221,5 +225,26 @@ class _LinkPageState extends State<LinkPage> {
         ],
       ),
     );
+  }
+
+  validateDeleteLink(String linkId) {
+    if (LinkModel.createdLinks.contains(linkId)) {
+      LinkModel.createdLinks.remove(linkId);
+      if (LinkModel.createdLinks.isEmpty &&
+          LinkModel.deletedLinks.isEmpty &&
+          LinkModel.updatedLinks.isEmpty) {
+        setState(() {
+          LinkModel.linksSynced = true;
+        });
+        
+      }
+      return;
+    }
+    if(LinkModel.linksSynced) {
+      setState(() {
+        LinkModel.linksSynced = false;
+      });
+    }
+    LinkModel.deletedLinks.add(linkId);
   }
 }
