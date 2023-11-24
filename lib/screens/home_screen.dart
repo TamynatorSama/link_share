@@ -1,12 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:link_share/bloc/actions/app_actions.dart';
 import 'package:link_share/bloc/app_bloc.dart';
 import 'package:link_share/screens/linkpage/link_page.dart';
 import 'package:link_share/screens/profile/profile_screen.dart';
+import 'package:link_share/shared/custom_loader.dart';
 import 'package:link_share/shared/shared_theme.dart';
 import 'package:link_share/utils/keyboard_checker.dart';
 
@@ -20,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
+    SchedulerBinding.instance.addPostFrameCallback((_) =>CustomLoader.showLoader(context));
     context.read<AppBloc>().add(InitUser());
     super.initState();
   }

@@ -28,7 +28,7 @@ class AppBloc extends Bloc<AppActions, AppState> {
           showFeedbackToast(CustomLoader.dialogContext!, response['message']);
           emit(AppState(currentUser: currentUser));
         }
-        emit(AppState(currentUser: currentUser,links: response["result"]));
+        emit(AppState(currentUser: currentUser,links: [...state.links,...response["result"]]));
       } catch (e) {
         Navigator.pushAndRemoveUntil(
             MyApp.navigatorKey.currentContext!,
@@ -37,7 +37,9 @@ class AppBloc extends Bloc<AppActions, AppState> {
         SharedPreferences preferences = await SharedPreferences.getInstance();
         preferences.setBool("isLoggedIn", true);
       }
+      CustomLoader.dismiss();
     });
+    on<RefreshLink>((event, emit) => emit(state.copyWith(updatedLinks: event.linkUpdate)));
     on<UpdateAppState>((event, emit) {
       emit(event.newState);
     });
