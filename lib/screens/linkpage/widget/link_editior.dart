@@ -11,10 +11,12 @@ class LinkEditor extends StatefulWidget {
   final LinkModel model;
   final int index;
   final Function() remove;
+  final Function(String linkId) update;
   const LinkEditor(
       {super.key,
       required this.model,
       required this.remove,
+      required this.update,
       required this.index});
 
   @override
@@ -84,7 +86,12 @@ class _LinkEditorState extends State<LinkEditor> {
           const SizedBox(
             height: 25,
           ),
-          CustomDropDown(label: "Platform",chosenLogo: widget.model.linkName,linkId: widget.model.id),
+          CustomDropDown(
+            label: "Platform",
+            chosenLogo: widget.model.linkName,
+            linkId: widget.model.id,
+            additionalOnchangeFunction: widget.update,
+            ),
           const SizedBox(
             height: 25,
           ),
@@ -92,6 +99,9 @@ class _LinkEditorState extends State<LinkEditor> {
             label: "Link",
             controller: linkController,
             svgPrefixIcon: "assets/images/icon-link.svg",
+            onChange: (value){
+              widget.update(widget.model.id);
+            },
             validator: (ob) {
               return null;
             },
@@ -100,4 +110,6 @@ class _LinkEditorState extends State<LinkEditor> {
       ),
     );
   }
+
+
 }

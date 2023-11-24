@@ -8,6 +8,7 @@ import 'package:link_share/shared/shared_theme.dart';
 class CustomDropDown extends StatefulWidget {
   final InputDecoration decoration;
   final String label;
+  final Function(String changeId)? additionalOnchangeFunction;
   final String? svgPrefixIcon;
   final String chosenLogo;
   final String linkId;
@@ -16,6 +17,7 @@ class CustomDropDown extends StatefulWidget {
       required this.label,
       this.svgPrefixIcon,
       required this.chosenLogo,
+      this.additionalOnchangeFunction,
       required this.linkId,
       this.decoration = const InputDecoration()});
 
@@ -107,6 +109,9 @@ class _CustomDropDownState extends State<CustomDropDown> {
             style: AppTheme.bodyText,
             onChanged: (value) {
               this.value = value;
+              if(widget.additionalOnchangeFunction !=null){
+                widget.additionalOnchangeFunction!(widget.linkId);
+              }
               context.read<AppBloc>().state.links.firstWhere((element) => widget.linkId == element.id).linkName = value ?? "";
             },
             items: [

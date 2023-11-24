@@ -10,11 +10,13 @@ class CustomInputField extends StatefulWidget {
   final String? svgPrefixIcon;
   final bool isPassword;
   final String? Function(String? ob)? validator;
+  final Function(String ob)? onChange;
   const CustomInputField(
       {super.key,
       required this.label,
       this.hint,
       this.svgPrefixIcon,
+      this.onChange,
       this.validator,
       required this.controller,
       this.isPassword = false,
@@ -68,6 +70,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             controller: widget.controller,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             cursorColor: const Color.fromARGB(255, 85, 85, 85),
+            onChanged: widget.onChange,
             decoration: widget.decoration.copyWith(
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 15, horizontal: 16),

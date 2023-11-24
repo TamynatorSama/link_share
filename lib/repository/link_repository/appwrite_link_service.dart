@@ -38,45 +38,74 @@ class AppWriteLinkService implements LinkService {
   }
 
   @override
-  Future<bool> syncData(
-      List<LinkModel> currentModel, String userId) async {
+  Future<bool> syncData(List<LinkModel> currentModel, String userId) async {
     List<Map<String, dynamic>> createdLinks =
         sortoutCreatedLinks(currentModel, userId);
-        bool hasError = false;
+    bool hasError = false;
     if (createdLinks.isNotEmpty) {
-      await Future.forEach(createdLinks, (element)async{
+      await Future.forEach(createdLinks, (element) async {
         try {
           await databases.createDocument(
               databaseId: appWriteDatabaseId,
               collectionId: appWriteLinkCollectionId,
               documentId: element["id"],
               data: element);
-              LinkModel.createdLinks.remove(element["id"]);
+          LinkModel.createdLinks.remove(element["id"]);
         } on AppwriteException catch (e) {
           hasError = true;
-          if(kDebugMode) print(e.message);
+          if (kDebugMode) print(e.message);
         }
       });
-      if(!hasError){
+      if (!hasError) {
         LinkModel.linksSynced = true;
       }
     }
-    if(LinkModel.deletedLinks.isNotEmpty){
-      await Future.forEach(LinkModel.deletedLinks, (element)async{
-        try{
-          await databases.deleteDocument(databaseId: appWriteDatabaseId, collectionId: appWriteLinkCollectionId, documentId: element);
-        }on AppwriteException catch (e) {
+    if (LinkModel.deletedLinks.isNotEmpty) {
+      await Future.forEach(LinkModel.deletedLinks, (element) async {
+        try {
+          await databases.deleteDocument(
+              databaseId: appWriteDatabaseId,
+              collectionId: appWriteLinkCollectionId,
+              documentId: element);
+              LinkModel.deletedLinks.remove(element);
+        } on AppwriteException catch (e) {
           hasError = true;
-          if(kDebugMode) print(e.message);
-        }catch(e){
-         hasError = true;
-          if(kDebugMode) print(e); 
+          if (kDebugMode) print(e.message);
+        } catch (e) {
+          hasError = true;
+          if (kDebugMode) print(e);
         }
       });
-      if(!hasError){
+      if (!hasError) {
         LinkModel.linksSynced = true;
       }
     }
+    if (LinkModel.updatedLinks.isNotEmpty) {
+      print(LinkModel.updatedLinks.length);
+      print(currentModel);
+      await Future.forEach(LinkModel.updatedLinks, (element) async {
+        try {
+          await databases.updateDocument(databaseId: appWriteDatabaseId,
+              collectionId: appWriteLinkCollectionId,
+              documentId: element,
+              data: currentModel.firstWhere((elem) => elem.id == element).toJson(userId));
+              
+        } on AppwriteException catch (e) {
+          hasError = true;
+          if (kDebugMode) print(e.message);
+        } catch (e) {
+          
+          hasError = true;
+          if (kDebugMode) print(e);
+        }
+        
+      });
+      if (!hasError) {
+        LinkModel.linksSynced = true;
+        LinkModel.updatedLinks = {};
+      }
+    }
+
     return hasError;
   }
 
