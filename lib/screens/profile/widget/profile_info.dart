@@ -1,32 +1,12 @@
-import 'package:appwrite/models.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:link_share/bloc/app_bloc.dart';
 import 'package:link_share/shared/custom_input.dart';
 
-class ProfileInfo extends StatefulWidget {
-  const ProfileInfo({Key? key}) : super(key: key);
-
-  @override
-  State<ProfileInfo> createState() => _ProfileInfoState();
-}
-
-class _ProfileInfoState extends State<ProfileInfo> {
-  late TextEditingController emailController;
-  late TextEditingController firstNameController;
-  late TextEditingController lastNameController;
-
-  @override
-  void initState() {
-    User? currentUser = context.read<AppBloc>().state.currentUser;
-    emailController = TextEditingController(text: currentUser?.email ?? "");
-    firstNameController =
-        TextEditingController(text: (currentUser?.name ?? "").split(" ").first);
-    lastNameController =
-        TextEditingController(text: (currentUser?.name ?? "").split(" ").last);
-
-    super.initState();
-  }
+class ProfileInfo extends StatelessWidget {
+  final TextEditingController emailController;
+  final TextEditingController firstNameController;
+  final TextEditingController lastNameController;
+  const ProfileInfo({Key? key,required this.emailController,required this.firstNameController,required this.lastNameController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +28,7 @@ class _ProfileInfoState extends State<ProfileInfo> {
               hint: "Last Name",
               label: "Last name*",
               controller: lastNameController),
-          CustomInputField(label: "Email", controller: emailController)
+          CustomInputField(label: "Email", controller: emailController,readOnly: true,)
         ],
       ),
       // child: Column(

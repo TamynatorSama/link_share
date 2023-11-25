@@ -5,6 +5,7 @@ import 'package:link_share/shared/shared_theme.dart';
 class CustomInputField extends StatefulWidget {
   final InputDecoration decoration;
   final String label;
+  final bool readOnly;
   final TextEditingController controller;
   final String? hint;
   final String? svgPrefixIcon;
@@ -15,6 +16,7 @@ class CustomInputField extends StatefulWidget {
       {super.key,
       required this.label,
       this.hint,
+      this.readOnly = false,
       this.svgPrefixIcon,
       this.onChange,
       this.validator,
@@ -59,9 +61,11 @@ class _CustomInputFieldState extends State<CustomInputField> {
         const SizedBox(
           height: 8,
         ),
+        
         Material(
           shadowColor: isFocused ?AppTheme.primaryColor.withOpacity(0.8):Colors.transparent,
           color: Colors.white,
+          type: MaterialType.canvas,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           elevation: isFocused ?5:0,
@@ -100,6 +104,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   borderSide:
                       const BorderSide(width: 1, color: Color(0xffD9D9D9))),
             ),
+            readOnly: widget.readOnly,
             obscureText: widget.isPassword,
             validator: widget.validator ??
                 (val) {
