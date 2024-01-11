@@ -68,7 +68,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
           type: MaterialType.canvas,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          elevation: isFocused ?5:0,
+          // elevation: isFocused ?5:0,
           child: TextFormField(
             focusNode: node,
             controller: widget.controller,

@@ -1,10 +1,18 @@
+import 'dart:io';
+
+import 'package:cached_memory_image/cached_memory_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:link_share/bloc/app_bloc.dart';
 import 'package:link_share/shared/shared_theme.dart';
 
 class UploadImageWidget extends StatelessWidget {
   final String? image;
-  const UploadImageWidget({Key? key, this.image}) : super(key: key);
+  final Function() uploadFunction;
+  
+  const UploadImageWidget({Key? key, this.image,required this.uploadFunction}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +34,17 @@ class UploadImageWidget extends StatelessWidget {
                 style: AppTheme.bodyText.copyWith(fontSize: 18),
               ),
             ),
-            Container(
+            InkWell(
+              onTap: uploadFunction,
+              child: Container(
               width: constraints.maxWidth / 1.5,
               height: constraints.maxHeight / 1.6,
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                   color: const Color(0xFFEFEBFF),
+                  image: image == null ? context.read<AppBloc>().state.image == null?null:DecorationImage(image: CachedMemoryImageProvider(context.read<AppBloc>().state.currentUser!.prefs.data["profile_id"]??"",bytes: context.read<AppBloc>().state.image),fit: BoxFit.cover):DecorationImage(image: FileImage(File(image??"")),fit: BoxFit.cover),
                   borderRadius: BorderRadius.circular(10)),
-              child: Column(
+              child:  Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SvgPicture.asset("assets/images/icon-upload-image.svg"),
@@ -46,6 +57,8 @@ class UploadImageWidget extends StatelessWidget {
                   )
                 ],
               ),
+            ),
+            
             ),
             const SizedBox(
               height: 20,

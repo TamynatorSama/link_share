@@ -130,6 +130,7 @@ class _SignUpState extends State<SignUp> {
                           text: "Create new account",
                           onTap: () {
                             if (_formKey.currentState?.validate() ?? true) {
+                              FocusScope.of(context).unfocus();
                               CustomLoader.showLoader(context);
                               context.read<AppBloc>().add(RegisterUser(
                                   email: emailController.text.trim(),

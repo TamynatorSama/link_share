@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:link_share/bloc/actions/app_actions.dart';
 import 'package:link_share/bloc/actions/auth_actions.dart';
@@ -11,6 +14,7 @@ import 'package:link_share/screens/auth_flow/login.dart';
 import 'package:link_share/screens/home_screen.dart';
 import 'package:link_share/shared/custom_loader.dart';
 import 'package:link_share/utils/appwrite_initializer.dart';
+import 'package:link_share/utils/constants.dart';
 import 'package:link_share/utils/dependency_manager.dart';
 import 'package:link_share/utils/feedback_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,12 +32,24 @@ class AppBloc extends Bloc<AppActions, AppState> {
           showFeedbackToast(CustomLoader.dialogContext!, response['message']);
           emit(AppState(currentUser: currentUser));
         }
-        emit(AppState(currentUser: currentUser,links: [...state.links,...response["result"]]));
+        Storage storage = Storage(AppWriteInit.appClient);
+        String? imageId = currentUser.prefs.data["profile_id"];
+        Uint8List? image;
+
+        if(imageId !=null){
+           image =  await storage
+            .getFileView(
+          bucketId: profilePictureBucketId,
+          fileId: imageId,
+        );
+        }
+
+      
+        emit(AppState(currentUser: currentUser,links: [...state.links,...response["result"]],image: image));
       } catch (e) {
-        Navigator.pushAndRemoveUntil(
-            MyApp.navigatorKey.currentContext!,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false);
+        Navigator.pushReplacement(
+            event.context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),);
         SharedPreferences preferences = await SharedPreferences.getInstance();
         preferences.setBool("isLoggedIn", true);
       }

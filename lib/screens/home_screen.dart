@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:link_share/bloc/actions/app_actions.dart';
 import 'package:link_share/bloc/app_bloc.dart';
 import 'package:link_share/screens/linkpage/link_page.dart';
+import 'package:link_share/screens/preview.dart';
 import 'package:link_share/screens/profile/profile_screen.dart';
 import 'package:link_share/shared/custom_loader.dart';
 import 'package:link_share/shared/shared_theme.dart';
@@ -20,10 +21,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  PageController controller = PageController();
+
   @override
   void initState() {
-    SchedulerBinding.instance.addPostFrameCallback((_) =>CustomLoader.showLoader(context));
-    context.read<AppBloc>().add(InitUser());
+    SchedulerBinding.instance
+        .addPostFrameCallback((_) => CustomLoader.showLoader(context));
+    context.read<AppBloc>().add(InitUser(context));
     super.initState();
   }
 
@@ -38,11 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // resizeToAvoidBottomInset: selectedIndex !=0,
       backgroundColor: const Color(0xffFAFAFA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
@@ -53,9 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             InkWell(
-              onTap: () => setState(() {
-                selectedIndex = 0;
-              }),
+              onTap: () => controller.jumpToPage(0),
               child: Container(
                 width: 70,
                 height: 45,
@@ -73,9 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 10,
             ),
             InkWell(
-              onTap: () => setState(() {
-                selectedIndex = 1;
-              }),
+              onTap: () {
+                controller.jumpToPage(1);
+              },
               child: Container(
                 width: 70,
                 height: 45,
@@ -92,7 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          Padding(
+          InkWell(
+            onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=> const Preview())),
+            child: Padding(
             padding: const EdgeInsets.all(13.0),
             child: Container(
               width: 60,
@@ -107,8 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppTheme.primaryColor,
               ),
             ),
-          )
-        ],
+          ),
+          )],
       ),
       body: Column(
         children: [
@@ -116,8 +120,14 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 20,
           ),
           Expanded(
-            child:
-                selectedIndex == 0 ? const LinkPage() : const ProfileScreen(),
+            child: PageView(
+              controller: controller,
+              onPageChanged: (value) {
+                selectedIndex = value;
+                setState(() {});
+              },
+              children: const [LinkPage(), ProfileScreen()],
+            ),
           )
         ],
       ),

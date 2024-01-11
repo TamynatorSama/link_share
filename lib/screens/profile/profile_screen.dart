@@ -1,6 +1,9 @@
 import 'package:appwrite/models.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:link_share/bloc/actions/app_actions.dart';
 import 'package:link_share/bloc/appState/app_state.dart';
 import 'package:link_share/bloc/app_bloc.dart';
 import 'package:link_share/repository/user_repository/user_service_interface.dart';
@@ -9,6 +12,7 @@ import 'package:link_share/screens/profile/widget/upload_widget.dart';
 import 'package:link_share/shared/custom_button.dart';
 import 'package:link_share/shared/shared_theme.dart';
 import 'package:link_share/utils/dependency_manager.dart';
+import 'package:link_share/utils/feedback_toast.dart';
 import 'package:link_share/utils/keyboard_checker.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -23,19 +27,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
   bool activateButton = false;
+  String? selectedImagePath;
 
   @override
   void initState() {
     User? currentUser = context.read<AppBloc>().state.currentUser;
     emailController = TextEditingController(text: currentUser?.email ?? "");
     firstNameController =
-        TextEditingController(text: (currentUser?.name ?? "").split(" ").first)
+        TextEditingController(text: currentUser?.prefs.data["first_name"] ?? "")
           ..addListener(checkEditState);
-    lastNameController = TextEditingController(
-        text: (currentUser?.name ?? "").split(" ").length > 1
-            ? (currentUser?.name ?? "").split(" ").last
-            : "")
-      ..addListener(checkEditState);
+    lastNameController =
+        TextEditingController(text: currentUser?.prefs.data["last_name"] ?? "")
+          ..addListener(checkEditState);
     super.initState();
   }
 
@@ -51,22 +54,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     User? currentUser = context.read<AppBloc>().state.currentUser;
 
     if (firstNameController.text.trim() !=
-            (currentUser!.name.isEmpty
-                ? ""
-                : currentUser.name.split(" ").first) ||
+            (currentUser?.prefs.data["first_name"] ?? "") ||
         lastNameController.text.trim() !=
-            (currentUser.name.isEmpty
-                ? ""
-                : currentUser.name.split(" ").length > 1
-                    ? currentUser.name.split(" ").last
-                    : "")) {
+            (currentUser?.prefs.data["last_name"] ?? "")) {
       activateButton = true;
+    } else {
+      activateButton = false;
     }
-    activateButton = false;
     if (newBtnState != activateButton) {
       setState(() {});
     }
   }
+
+  checkUpdate() {}
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +116,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
-                                const UploadImageWidget(),
+                                UploadImageWidget(
+                                  image: selectedImagePath,
+                                  uploadFunction: () async {
+                                    
+                                        await FilePicker.platform
+                                            .pickFiles(
+                                      type: FileType.image,
+                                    )
+                                            .then((value) {
+                                      if (value != null) {
+                                        selectedImagePath = value.paths.first;
+                                        print(selectedImagePath);
+                                        setState(() {});
+                                      }
+                                    });
+                                  },
+                                ),
                                 const SizedBox(
                                   height: 30,
                                 ),
@@ -151,39 +167,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           horizontal: 14),
                                       child: CustomButton(
                                         text: "Save",
-                                        onTap: !activateButton
+                                        shouldShowLoader: true,
+                                        onTap: !activateButton &&
+                                                selectedImagePath == null
                                             ? null
                                             : () async {
-                                                var response = await currentUserService.updateProfile(
-                                                    UpdateType.name,
-                                                    firstName: firstNameController.text.trim() !=
-                                                            (state.currentUser!
-                                                                    .name.isEmpty
-                                                                ? ""
-                                                                : state
-                                                                    .currentUser!
-                                                                    .name
-                                                                    .split(" ")
-                                                                    .first)
-                                                        ? firstNameController
-                                                            .text
-                                                        : null,
-                                                    lastName: lastNameController
+                                                await currentUserService
+                                                    .updateProfile(
+                                                      pictureId:state.currentUser!.prefs.data["profile_id"],
+                                                        picturePath:
+                                                            selectedImagePath,
+                                                        firstName:
+                                                            firstNameController
                                                                 .text
-                                                                .trim() !=
-                                                            (state.currentUser!
-                                                                    .name.isEmpty
-                                                                ? ""
-                                                                : state.currentUser!.name.split(" ").length >
-                                                                        1
-                                                                    ? state
-                                                                        .currentUser!
-                                                                        .name
-                                                                        .split(" ")
-                                                                        .last
-                                                                    : "")
-                                                        ? lastNameController.text
-                                                        : null);
+                                                                .trim(),
+                                                        lastName:
+                                                            lastNameController
+                                                                .text)
+                                                    .then((value) {
+                                                  if (value["status"]) {
+                                                    context.read<AppBloc>().add(
+                                                        UpdateAppState(
+                                                            state.copyWith(
+                                                                image: value[
+                                                                    "image"],
+                                                                updatedUser: value[
+                                                                    "result"])));
+                                                                    selectedImagePath = null;
+                                                                    setState(() {});
+
+                                                    return;
+                                                  }
+                                                  showFeedbackToast(context,
+                                                      value["message"]);
+                                                });
                                               },
                                       ),
                                     ),

@@ -86,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     text: "Login",
                     onTap: () {
                       if (_formKey.currentState?.validate() ?? true) {
+                        FocusScope.of(context).unfocus();
                         CustomLoader.showLoader(context);
                         context.read<AppBloc>().add(LoginUser(
                             email: emailController.text.trim(),
