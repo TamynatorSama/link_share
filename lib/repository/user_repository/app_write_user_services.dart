@@ -6,8 +6,6 @@ import 'package:link_share/repository/user_repository/user_service_interface.dar
 import 'package:link_share/utils/appwrite_initializer.dart';
 import 'package:link_share/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
 
 class AppWriteUserService implements UserServices {
   Account account = Account(AppWriteInit.appClient);
